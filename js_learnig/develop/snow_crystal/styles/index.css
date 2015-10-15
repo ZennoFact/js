@@ -13,6 +13,5 @@ body {
 #canvas {
   float: left;
   display: block;
-  /*background-color: #464646;*/
-  background-color: #000000;
+  background-color: #464646;
 }

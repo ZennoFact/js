@@ -34,23 +34,37 @@ gl.clear(gl.COLOR_BUFFER_BIT);
 var triangleData = genTriangle();
 // 頂点データからバッファを生成
 var vertexBuffer = gl.createBuffer();
-
+// バッファのバインド処理　一時的なバッファをWebGLコンテキストと結び付ける
 gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+// 頂点データのバッファへの書き込み
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleData.p), gl.STATIC_DRAW);
 // シェーダとプログラムオブジェクト
+// HTMLに埋め込んであるシェーダのソースコードを取得
 var vertexSource = $('#vs')[0].text;
 var fragmentSource = $('#fs')[0].text;
-var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-var programs = gl.createProgram();
-gl.shaderSource(vertexShader, vertexSource);
-gl.compileShader(vertexShader);
-gl.attachShader(programs, vertexShader);
-gl.shaderSource(fragmentShader, fragmentSource);
-gl.compileShader(fragmentShader);
-gl.attachShader(programs, fragmentShader);
-gl.linkProgram(programs);
-gl.useProgram(programs);
+
+// // シェーダオブジェクトの生成（定数次第で頂点シェーダになるかフラグメントシェーダになるかが変わる）
+// var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+// var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+// // シェーダ同士を結び付けるプログラムオブジェクトの生成
+// var programs = gl.createProgram();
+// //　シェーダへのソースコードの割り当て
+// gl.shaderSource(vertexShader, vertexSource);
+// // シェーダのコンパイル
+// gl.compileShader(vertexShader);
+// // シェーダのアタッチ
+// gl.attachShader(programs, vertexShader);
+// gl.shaderSource(fragmentShader, fragmentSource);
+// gl.compileShader(fragmentShader);
+// gl.attachShader(programs, fragmentShader);
+//
+// // 頂点シェーダとフラグメントシェーダをリンク
+// gl.linkProgram(programs);
+// // プログラムオブジェクトを選択状態にする（使用を宣言）
+// gl.useProgram(programs);
+
+// 上記処理を関数化したものでプログラムオブジェクトを初期化
+var programs = shaderProgram(vertexSource, fragmentSource);
 
 // プログラムオブジェクトに三角形の頂点データを登録
 var attLocation = gl.getAttribLocation(programs, 'position');
@@ -58,15 +72,62 @@ gl.enableVertexAttribArray(attLocation);
 gl.vertexAttribPointer(attLocation, 3, gl.FLOAT, false, 0, 0);
 
 // 描画
+// 描画用の配列に頂点データを結び付け
 gl.drawArrays(gl.TRIANGLES, 0, triangleData.p.length / 3);
+// 描画開始
 gl.flush();
 // });
+
+// シェーダのコンパイルやプログラムオブジェクトの設定などをすべて行ってくれる関数の例（あくまで例）
+function shaderProgram(vertexSource, fragmentSource) {
+  // シェーダオブジェクトの生成
+  var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+  var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+  //　シェーダにソースを割り当ててコンパイル
+  gl.shaderSource(vertexShader, vertexSource);
+  gl.compileShader(vertexShader);
+  // コンパイルチェックとエラーメッセージの表示
+  if( gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS) ) {
+    console.log("VertexShader compile: OK");
+  } else {
+    alert(gl.getShaderInfoLog(vertexShader))
+  }
+  gl.shaderSource(fragmentShader, fragmentSource);
+  gl.compileShader(fragmentShader);
+  if( gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS) ) {
+    console.log("FragmentShader compile: OK");
+  } else {
+    alert(gl.getShaderInfoLog(fragmentShader))
+  }
+
+  // プログラムオブジェクトの生成から選択まで
+  var programs = gl.createProgram();
+  gl.attachShader(programs, vertexShader);
+  gl.attachShader(programs, fragmentShader);
+  gl.linkProgram(programs);
+  // シェーダのリンクが正しく行われたかチェック
+  if( gl.getProgramParameter(programs, gl.LINK_STATUS) ) {
+    console.log("Program link: OK");
+    gl.useProgram(programs);
+  } else {
+    alert( gl.getProgramInfoLog(programs) );
+  }
+
+  return programs
+}
+
 function genTriangle() {
   var obj = {};
   obj.p = [
+    // １つ目の三角形
     0.0, 0.5, 0.0,
     0.5, -0.5, 0.0,
-    -0.5, -0.5, 0.0
+    -0.5, -0.5, 0.0,
+    // ２つ目の三角形
+    0.0, -0.5, 0.0,
+    0.5, 0.5, 0.0,
+    -0.5, 0.5, 0.0
   ];
   return obj;
 }
