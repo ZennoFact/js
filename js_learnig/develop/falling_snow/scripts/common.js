@@ -16,6 +16,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
   console.log('The File APIs are not fully supported in this browser.');
 }
 
+
+// TODO: この辺の変数とか整理する(この下のクリックの操作は毎回入ってダサいとは思うが，何とかならんだろうか)
+var bgImage;
 // ファイル読み込み
 $('.fileReader').change(function() {
   // 選択されたファイルがない場合は何もせずにreturn
@@ -33,8 +36,9 @@ $('.fileReader').change(function() {
 
   // callback
   fileReader.onload = function(event) {
+    bgImage = event.target.result;
     $("body").css({
-      "background-image": "url(" + event.target.result + ")",
+      "background-image": "url(" + bgImage + ")",
       "background-position": "center center",
       "background-repeat": "no-repeat",
       "background-attachment": "fixed",
@@ -45,6 +49,17 @@ $('.fileReader').change(function() {
 
   // get imageFile
   fileReader.readAsDataURL(file);
+});
+
+$('.fileReader').click(function() {
+  $("body").css({
+    "background-image": "url(" + bgImage + ")",
+    "background-position": "center center",
+    "background-repeat": "no-repeat",
+    "background-attachment": "fixed",
+    "background-size": "cover"
+  });
+  $('#video').addClass("noDisp");
 });
 
 // 背景画像の読み込みがここでできたらいいな

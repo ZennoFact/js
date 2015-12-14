@@ -75,6 +75,7 @@ h1{
   margin: 0;
   font-size: 100px;
   cursor: pointer;
+  /* TODO: なぜかカメラが反転しない */
 }
 
 #canvas {
@@ -96,4 +97,8 @@ h1{
 
 .noDisp {
   display: none;
+}
+
+#video {
+  -webkit-transform: scaleX(-1);
 }
